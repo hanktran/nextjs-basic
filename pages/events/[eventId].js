@@ -1,13 +1,14 @@
-import Head from "next/head";
+import { Fragment } from 'react';
+import Head from 'next/head';
 
-import { Fragment } from "react";
+import { getEventById, getFeaturedEvents } from '../../helpers/api-util';
+import EventSummary from '../../components/event-detail/event-summary';
+import EventLogistics from '../../components/event-detail/event-logistics';
+import EventContent from '../../components/event-detail/event-content';
+import ErrorAlert from '../../components/ui/error-alert';
+import Comments from '../../components/input/comments';
 
-import { getEventById, getFeaturedEvents } from "../../helpers/api-util";
-import EventSummary from "../../components/event-detail/event-summary";
-import EventLogistics from "../../components/event-detail/event-logistics";
-import EventContent from "../../components/event-detail/event-content";
-
-const EventDetailPage = (props) => {
+function EventDetailPage(props) {
   const event = props.selectedEvent;
 
   if (!event) {
@@ -23,7 +24,7 @@ const EventDetailPage = (props) => {
       <Head>
         <title>{event.title}</title>
         <meta
-          name="description"
+          name='description'
           content={event.description}
         />
       </Head>
@@ -37,29 +38,32 @@ const EventDetailPage = (props) => {
       <EventContent>
         <p>{event.description}</p>
       </EventContent>
+      <Comments eventId={event.id} />
     </Fragment>
   );
-};
+}
 
 export async function getStaticProps(context) {
   const eventId = context.params.eventId;
+
   const event = await getEventById(eventId);
 
   return {
     props: {
-      selectedEvent: event,
+      selectedEvent: event
     },
-    revalidate: 30,
+    revalidate: 30
   };
 }
 
 export async function getStaticPaths() {
-  const allEvents = await getFeaturedEvents();
-  const paths = allEvents.map((event) => ({ params: { eventId: event.id } }));
+  const events = await getFeaturedEvents();
+
+  const paths = events.map(event => ({ params: { eventId: event.id } }));
 
   return {
     paths: paths,
-    fallback: "blocking",
+    fallback: 'blocking'
   };
 }
 
